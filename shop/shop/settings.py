@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'djoser',
     'api',
     'users',
+    'books',
 ]
 
 MIDDLEWARE = [
