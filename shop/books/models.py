@@ -3,17 +3,27 @@ from users.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
-class Category(models.Model):
-    name = models.CharField('Название категории', max_length=256,)
+class Genre(models.Model):
+    name = models.CharField('Название жанра', max_length=256)
     slug = models.SlugField('Слаг', max_length=50, unique=True)
+
+    class Meta:
+        ordering = ('-id',)
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self) -> str:
         return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField('Название жанра', max_length=256)
+class Tag(models.Model):
+    name = models.CharField('Название тега', max_length=256)
     slug = models.SlugField('Слаг', max_length=50, unique=True)
+
+    class Meta:
+        ordering = ('-id',)
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
     def __str__(self) -> str:
         return self.name
@@ -22,6 +32,11 @@ class Genre(models.Model):
 class Series(models.Model):
     name = models.CharField('Серия книги')
     slug = models.SlugField('Слаг', max_length=50, unique=True)
+
+    class Meta:
+        ordering = ('-id',)
+        verbose_name = 'Из серии'
+        verbose_name_plural = 'Из серии'
 
 
 class Book(models.Model):
@@ -36,7 +51,7 @@ class Book(models.Model):
     )
     series = models.ManyToManyField(
         Series,
-        verbose_name='Серия книги',
+        verbose_name='Из серии',
         on_delete=models.CASCADE,
         related_name='books',
         help_text='Автор книги',
@@ -58,16 +73,14 @@ class Book(models.Model):
         null=True,
     )
     page_count = models.PositiveSmallIntegerField('Количество страниц')
-    price = models.PositiveSmallIntegerField('Цена')
-    epub = models.BooleanField()
-    epub = models.BooleanField()
-    epub = models.BooleanField()
-    comments = models.ForeignKey()
-    volume = models.PositiveSmallIntegerField('Объем')
     age_limit = models.PositiveSmallIntegerField('Возрастное ограничение')
-    translator = models.ForeignKey()
-    copyright_holder = models.ForeignKey()
-    publisher = models.ForeignKey()
+    price = models.PositiveSmallIntegerField('Цена')
+    fb2 = models.BooleanField('FB2 версия книги')
+    epub = models.BooleanField('EPUB версия книги')
+    pdf = models.BooleanField('PDF версия книги')
+    # translator = models.ForeignKey()
+    # copyright_holder = models.ForeignKey()
+    # publisher = models.ForeignKey()
     image = models.ImageField(
         'Обложка книги',
         upload_to='books_images/',
@@ -80,14 +93,35 @@ class Book(models.Model):
         related_name='recipes',
         help_text='Выберите теги'
     )
-    transfer_date = models.DateTimeField(
-        'Дата публикации рецепта',
-        auto_now_add=True,
+    transfer_date = models.PositiveSmallIntegerField(
+        'Дата перевода',
+        help_text='Введите дату перевода книги'
     )
-    writing_date = models.DateTimeField(
-        'Дата публикации рецепта',
-        auto_now_add=True,
+    writing_date = models.PositiveSmallIntegerField(
+        'Дата написания',
+        help_text='Введите дату написания книги'
     )
 
     def __str__(self) -> str:
         return self.name
+
+
+class Comment(models.Model):
+    text = models.TextField()
+    review = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        'Дата добавления',
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return self.text
